@@ -1,3 +1,4 @@
+#find the middle of the river at each resolution
 
 rm(list=ls())
 
