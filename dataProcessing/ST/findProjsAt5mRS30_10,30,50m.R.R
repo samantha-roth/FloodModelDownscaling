@@ -17,7 +17,9 @@ load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/not.river.inds5m.R
 
 coordsIwant.5m<- coords.5m[not.river.inds5m,]
 
-SS<-nrow(coordsIwant.5m)
+SS<-30
+
+load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/obsWE_RS.RData")
 
 ################################################################################
 
@@ -26,7 +28,7 @@ closest10mto5m_noRiver<- matrix(NA, ncol= nRuns, nrow= SS)
 for(i in 1:nRuns){
   run<- rast(paste0("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs10m/Norristown/nCh/Extent/Run_",i,".asc"))
   vals<- extract(run,coordsIwant.5m)
-  closest10mto5m_noRiver[,i]<- vals$max
+  closest10mto5m_noRiver[,i]<- vals$max[RS]
 }
 
 save(closest10mto5m_noRiver,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/closest10mto5m_noRiver.RData")
@@ -38,7 +40,7 @@ closest30mto5m_noRiver<- matrix(NA, ncol= nRuns, nrow= SS)
 for(i in 1:nRuns){
   run<- rast(paste0("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs30m/Norristown/nCh/Extent/Run_",i,".asc"))
   vals<- extract(run,coordsIwant.5m)
-  closest30mto5m_noRiver[,i]<- vals$max
+  closest30mto5m_noRiver[,i]<- vals$max[RS]
 }
 
 save(closest30mto5m_noRiver,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/closest30mto5m_noRiver.RData")
@@ -50,7 +52,7 @@ closest50mto5m_noRiver<- matrix(NA, ncol= nRuns, nrow= SS)
 for(i in 1:nRuns){
   run<- rast(paste0("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs50m/Norristown/nCh/Extent/Run_",i,".asc"))
   vals<- extract(run,coordsIwant.5m)
-  closest50mto5m_noRiver[,i]<- vals$max
+  closest50mto5m_noRiver[,i]<- vals$max[RS]
 }
 
 save(closest50mto5m_noRiver,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/closest50mto5m_noRiver.RData")
