@@ -18,8 +18,8 @@ dem10<- rast("C:/Users/svr5482/Downloads/NewDEMS/norristown_10m_new.asc")
 dem50<- rast("C:/Users/svr5482/Downloads/NewDEMS/norristown_50m_new.asc")
 
 #load calibrated runs
-Run10m<- rast("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/Run10m_simplecal.asc")
-Run50m<- rast("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/Run50m_simplecal.asc")
+Run10m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs10m/Norristown/nCh/simplecalQs/Extent/Run_1.asc")
+Run50m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs50m/Norristown/nCh/simplecalQs/Extent/Run_1.asc")
 ncell50m<- ncell(Run50m)
 
 coords.10m<- xyFromCell(Run10m,1:ncell(Run10m))
