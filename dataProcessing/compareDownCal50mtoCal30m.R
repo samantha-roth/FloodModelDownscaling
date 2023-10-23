@@ -14,8 +14,8 @@ n30<- 35
 library(terra)
 
 #load DEMs
-dem30<- rast("C:/Users/svr5482/Downloads/NewDEMS/norristown_30m_new.asc")
-dem50<- rast("C:/Users/svr5482/Downloads/NewDEMS/norristown_50m_new.asc")
+dem30<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/LISFLOOD/norristown_30m_new.asc")
+dem50<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/LISFLOOD/norristown_50m_new.asc")
 
 #load calibrated runs
 Run30m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs30m/Norristown/nCh/simplecalQs/Extent/Run_1.asc")
