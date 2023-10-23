@@ -1,7 +1,3 @@
-#explore whether elevation, slope, TRI, flow accumulation, and cost at 10m
-#and differences between these variables at 30m and 10m impact residuals
-#from either model WSE10m ~ poly(WSE30mat10m,2)
-#OR if they impact downscaled.z.vec- WSE10m or WSE30mat10m-WSE10m 
 
 rm(list=ls())
 
@@ -18,8 +14,8 @@ dem10<- rast("C:/Users/svr5482/Downloads/NewDEMS/norristown_10m_new.asc")
 dem30<- rast("C:/Users/svr5482/Downloads/NewDEMS/norristown_30m_new.asc")
 
 #load calibrated runs
-Run10m<- rast("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/Run10m_simplecal.asc")
-Run30m<- rast("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/Run30m_simplecal.asc")
+Run10m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs10m/Norristown/nCh/simplecalQs/Extent/Run_1.asc")
+Run30m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs30m/Norristown/nCh/simplecalQs/Extent/Run_1.asc")
 ncell30m<- ncell(Run30m)
 
 coords.10m<- xyFromCell(Run10m,1:ncell(Run10m))
@@ -306,4 +302,3 @@ plot(DEMinfo_10m[,4],resids,xlab="slope",ylab="resid")
 plot(DEMinfo_10m[,5],resids,xlab="TRI",ylab="resid")
 
 plot(DEMinfo_10m[,6],resids,xlab="Flow Acc",ylab="resid")
-
