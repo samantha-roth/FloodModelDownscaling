@@ -9,17 +9,16 @@ if(dir.exists("C:/Users/svr5482/Reification/Philly/plots")==F){
   dir.create("C:/Users/svr5482/Reification/Philly/plots")
 }
 
-n30<- 104
-
 library(terra)
-
-
 
 #load DEMs
 dem30<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/LISFLOOD/norristown_30m_new.asc")
 dem50<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/LISFLOOD/norristown_50m_new.asc")
 
 quantiles<- c(.01,.05,.1,.25,.5,.75,.9,.95,.99)
+coords.30m<- xyFromCell(dem30,1:ncell(dem30))
+
+n30<- length(unique(coords.30m))
 
 for(i in 1:9){
   #load calibrated runs
