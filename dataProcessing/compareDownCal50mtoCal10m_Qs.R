@@ -188,7 +188,7 @@ for(i in 1:9){
   save(residsbyloc.df,file=paste0("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/WSH10-downscale50_q",quantiles[i],".RData"))
   
   #load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/MinandMaxWSH-Dnscl.RData")
-  load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/MinandMaxWSH-Dnsclno50to10.RData")
+  #load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/MinandMaxWSH-Dnsclno50to10.RData")
   
   jpeg(filename=paste0("C:/Users/svr5482/Reification/Philly/plots/dnscl,cal50-cal10resids_spatial_q",quantiles[i],".jpeg"), width = 800, height = 700)
   print(ggplot(residsbyloc.df, aes(x, y, color=value))+
