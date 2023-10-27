@@ -1,3 +1,4 @@
+
 rm(list=ls())
 
 ################################################################################
@@ -40,6 +41,15 @@ minElevNoFlood30m<- min(DEMinfo_30m[-floodInds,"elev"])
 
 save(floodInds,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/floodInds30m.RData")
 
+flood.30mat10m<- extract(Run30m,coords.10m)
+
+binFlood.30mat10m<- ifelse(flood.30mat10m$Run_1>0,1,0)
+
+plot(DEMinfo_10m[,"elev"],binFlood.30mat10m)
+floodInds<- which(binFlood.30mat10m==1)
+
+save(floodInds,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/floodInds30mat10m.RData")
+
 ################################################################################
 #50m
 
@@ -59,3 +69,23 @@ minElevNoFlood50m<- min(DEMinfo_50m[-floodInds,"elev"])
 
 save(floodInds,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/floodInds50m.RData")
 
+################################################################################
+
+flood.50mat10m<- extract(Run50m,coords.10m)
+
+binFlood.50mat10m<- ifelse(flood.50mat10m$Run_1>0,1,0)
+
+plot(DEMinfo_10m[,"elev"],binFlood.50mat10m)
+floodInds<- which(binFlood.50mat10m==1)
+
+save(floodInds,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/floodInds50mat10m.RData")
+
+################################################################################
+flood.50mat30m<- extract(Run50m,coords.30m)
+
+binFlood.50mat30m<- ifelse(flood.50mat30m$Run_1>0,1,0)
+
+plot(DEMinfo_30m[,"elev"],binFlood.50mat30m)
+floodInds<- which(binFlood.50mat30m==1)
+
+save(floodInds,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/floodInds50mat30m.RData")
