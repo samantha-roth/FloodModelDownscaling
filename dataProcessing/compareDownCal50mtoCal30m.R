@@ -1,5 +1,5 @@
 #explore whether elevation, slope, TRI, flow accumulation, and cost at 30m
-#and differences between these variables at 50m and 50m impact residuals
+#and differences between these variables at 50m and 30m impact residuals
 #from either model WSE30m ~ poly(WSE50mat30m,2)
 #OR if they impact downscaled.z.vec- WSE30m or WSE50mat30m-WSE30m 
 
@@ -18,8 +18,8 @@ dem30<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_
 dem50<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/LISFLOOD/norristown_50m_new.asc")
 
 #load calibrated runs
-Run30m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs30m/Norristown/nCh/simplecalQs/Extent/Run_1.asc")
-Run50m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs50m/Norristown/nCh/simplecalQs/Extent/Run_1.asc")
+Run30m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs30m/Norristown/nCh/simplecal/Extent/Run_1.asc")
+Run50m<- rast("C:/Users/svr5482/FloodingModelCalibrationProject/04-Spatial_Stats_Samantha/Outputs50m/Norristown/nCh/simplecal/Extent/Run_1.asc")
 ncell50m<- ncell(Run50m)
 
 coords.30m<- xyFromCell(Run30m,1:ncell(Run30m))
@@ -58,15 +58,15 @@ keepInds<- intersect(which(!is.na(costdiffs)),goodinds)
 
 #compute WSE at each resolution on 30m grid
 
-WSE50mat30m<- flood.50mat30m$Run50m_simplecal[keepInds] + elev.50mat30m$norristown_50m_new[keepInds]
-WSE30m<- flood.30m$Run30m_simplecal[keepInds]+elev.30m$norristown_30m_new[keepInds]
+WSE50mat30m<- flood.50mat30m$Run_1[keepInds] + elev.50mat30m$norristown_50m_new[keepInds]
+WSE30m<- flood.30m$Run_1[keepInds]+elev.30m$norristown_30m_new[keepInds]
 
 #compute difference in calibrated WSEs at 50m on 30m grid vs 30m
 wsediff<- WSE50mat30m - WSE30m
 
-WSH50mat30m<- flood.50mat30m$Run50m_simplecal[keepInds] + 
+WSH50mat30m<- flood.50mat30m$Run_1[keepInds] + 
   elev.50mat30m$norristown_50m_new[keepInds] - elev.30m$norristown_30m_new[keepInds]
-WSH30m<- flood.30m$Run30m_simplecal[keepInds] 
+WSH30m<- flood.30m$Run_1[keepInds] 
 
 #compute difference in calibrated WSEs at 50m on 30m grid vs 30m
 wshdiff<- WSH50mat30m - WSH30m
@@ -111,7 +111,7 @@ library(akima)
 elev.50m<- extract(dem50,coords.50m)
 wsh.50m<- extract(Run50m,coords.50m)
 vals.50m<- wsh.50m + elev.50m 
-z1= matrix(vals.50m$Run50m_simplecal, nrow= ny50m, ncol= nx50m, byrow= TRUE)
+z1= matrix(vals.50m$Run_1, nrow= ny50m, ncol= nx50m, byrow= TRUE)
 
 z= matrix(NA,nrow= ny50m, ncol= nx50m)
 for(j in 1:nx50m){ z[,j]<- rev(z1[,j]) }
@@ -129,88 +129,21 @@ downscaled.z.vec<- downscaled.z.vec- elevIwant.30m$norristown_30m_new
 
 indstoCompare<- intersect(keepInds,coordsIwantInds)
 
-downscale50m<- rep(NA,length(flood.30m$Run30m_simplecal))
+downscale50m<- rep(NA,length(flood.30m$Run_1))
 downscale50m[coordsIwantInds]<- downscaled.z.vec
 
 downscale50m<- downscale50m[indstoCompare]
 
-WSHtocompare<- flood.30m$Run30m_simplecal[indstoCompare] 
+WSHtocompare<- flood.30m$Run_1[indstoCompare] 
 
 plot(downscale50m,WSHtocompare,main="Calibrated, downscaled 50m WSH VS calibrated 30m WSH",
      xlab="Calibrated, downscaled 50m WSH", ylab= "Calibrated 30m WSH")
 
-#how well can we predict calibrated WSH at 30m using calibrated WSH at 50m on 30m grid?
-fit<- lm(WSHtocompare~ downscale50m)
-summary(fit)
-resids<- fit$residuals
-#incredibly damn well, better than when not bilinearly interpolated!
+#predict WSH at 30m with downscale 50m
 
-plot(WSHtocompare,resids)
-plot(fit$fitted.values,WSHtocompare)
+#length(which(downscale50m<0))
 
-summary(resids)
-#50% of calibrated 50m flood heights are 
-#within (-.18356, .15672) m of the calibrate 30m flood height
-
-#make a dataframe to plot residuals in space
-residsbyloc.df<- as.data.frame(cbind(coords.30m[indstoCompare,],resids))
-colnames(residsbyloc.df)<-c("x","y","value")
-
-library(ggplot2)
-
-jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/dnsclWSHmodresids_spatial.jpeg", width = 700, height = 700)
-ggplot(residsbyloc.df, aes(x, y, color=value))+
-  geom_point(shape="square",size=2) + ggtitle("Residuals in space- WSHtocompare~ downscale50m") +theme_bw()+
-  scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red") +
-  theme(plot.title = element_text(size=24),
-    axis.title.x = element_text(size = 24),
-    axis.text.x = element_text(size = 18),
-    axis.title.y = element_text(size = 24),
-    axis.text.y = element_text(size = 18))
-dev.off()
-
-#highish residuals near bottom of river
-#lowish residuals near middle and for below river, near upper
-#most extreme values above river near top of region
-
-################################################################################
-
-##load DEM info at 50m and 30m resolution on 30m grid
-#load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/DEM_info50mat30m.RData")
-#load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/DEM_info30m.RData")
-
-#DEMinfo_30m<- DEMinfo_30m[indstoCompare,]
-#DEMinfo_50m<- DEMinfo_50m[indstoCompare,]
-
-#DEMinfo_diff<- DEMinfo_50m-DEMinfo_30m
-
-#plot(DEMinfo_diff[,3],resids,xlab="elev diff",ylab="resid")
-
-#plot(DEMinfo_diff[,4],resids,xlab="slope diff",ylab="resid")
-
-#plot(DEMinfo_diff[,5],resids,xlab="TRI diff",ylab="resid")
-
-#DEMinfo_diff[,6]<- DEMinfo_50m[,6]/ncell50m- DEMinfo_30m[,6]/nrow(coords.30m)
-
-#plot(DEMinfo_diff[,6],resids,xlab="Flow Acc Pct diff",ylab="resid")
-
-#DEMinfo_diff<- cbind(DEMinfo_diff,DEMinfo_50m[,6]/ncell50m/DEMinfo_30m[,6]/nrow(coords.30m))
-
-#plot(DEMinfo_diff[,7],resids,xlab="Flow Acc ratio",ylab="resid")
-
-##IF ANYTHING: more negative elevation difference --> positive residual,
-## positive elevation difference --> negative residual
-
-#bin_res<- ifelse(resids>0,1,0)
-#bin_elev.diff<- ifelse(DEMinfo_diff[,3]>0,1,0)
-
-#fit.sign.res<- glm(bin_res~bin_elev.diff[indstoCompare],family="binomial")
-#summary(fit.sign.res)
-##not even close to significant
-
-################################################################################
-
-#now assume we can only predict WSH at 30m with downscale 50m
+#downscale50m[which(downscale50m<0)]<- 0
 
 resids<- WSHtocompare- downscale50m
 
@@ -227,11 +160,11 @@ save(residsbyloc.df,file="C:/Users/svr5482/Reification/Philly/data/Norristown/nC
 library(ggplot2)
 
 #load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/MinandMaxWSH-Dnscl.RData")
-load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/MinandMaxWSH-Dnsclno50to10.RData")
+#load("C:/Users/svr5482/Reification/Philly/data/Norristown/nCh/simplecal/MinandMaxWSH-Dnsclno50to30.RData")
 
 jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/dnscl,cal50-cal30resids_spatial.jpeg", width = 800, height = 700)
 ggplot(residsbyloc.df, aes(x, y, color=value))+
-  geom_point(shape="square",size=5) + ggtitle("Residuals in space- WSH30m- downscale50m") +theme_bw()+
+  geom_point(shape="square",size=1.8) + ggtitle("Residuals in space- WSH30m- downscale50m") +theme_bw()+
   #scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red",limits=c(minres,maxres))+
   scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red")+
   theme(plot.title = element_text(size=24),
@@ -302,8 +235,77 @@ plot(costdiffs[indstoCompare],resids,xlab="Cost Difference",ylab="resid")
 
 plot(DEMinfo_30m[,3],resids,xlab="elev",ylab="resid")
 
-plot(DEMinfo_30m[,4],resids,xlab="slope",ylab="resid")
+#jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/slope30mVSdnscl,cal50-cal30resids.jpeg", width = 800, height = 700)
+plot(DEMinfo_30m[,4],resids,xlab="slope",ylab="resid",main="downscale from 50m to 30m resid vs 30m slope")
+#dev.off()
 
 plot(DEMinfo_30m[,5],resids,xlab="TRI",ylab="resid")
 
 plot(DEMinfo_30m[,6],resids,xlab="Flow Acc",ylab="resid")
+###############################################################
+#two way interactions
+
+residsbylocandDEM.df<- as.data.frame(cbind(indstoCompare,resids,DEMinfo_30m))
+colnames(residsbylocandDEM.df)[1:2]<-c("inds","value")
+
+library(ggplot2)
+
+jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/dnscl50-30res_elevVSslope.jpeg", width = 800, height = 700)
+ggplot(residsbylocandDEM.df, aes(elev, slope, color=value))+
+  geom_point(size=1.5) + ggtitle("Residuals in space- WSH30m- downscale50m") +theme_bw()+
+  #scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red",limits=c(minres,maxres))+
+  scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red")+
+  theme(plot.title = element_text(size=24),
+        axis.title.x = element_text(size = 24),
+        axis.text.x = element_text(size = 18),
+        axis.title.y = element_text(size = 24),
+        axis.text.y = element_text(size = 18))
+dev.off()
+
+jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/dnscl50-30res_elevVSTRI.jpeg", width = 800, height = 700)
+ggplot(residsbylocandDEM.df, aes(elev, TRI, color=value))+
+  geom_point(size=1.5) + ggtitle("Residuals in space- WSH30m- downscale50m") +theme_bw()+
+  #scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red",limits=c(minres,maxres))+
+  scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red")+
+  theme(plot.title = element_text(size=24),
+        axis.title.x = element_text(size = 24),
+        axis.text.x = element_text(size = 18),
+        axis.title.y = element_text(size = 24),
+        axis.text.y = element_text(size = 18))
+dev.off()
+
+jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/dnscl50-30res_elevVSflowacc.jpeg", width = 800, height = 700)
+ggplot(residsbylocandDEM.df, aes(elev, flowacc, color=value))+
+  geom_point(size=1.5) + ggtitle("Residuals in space- WSH30m- downscale50m") +theme_bw()+
+  #scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red",limits=c(minres,maxres))+
+  scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red")+
+  theme(plot.title = element_text(size=24),
+        axis.title.x = element_text(size = 24),
+        axis.text.x = element_text(size = 18),
+        axis.title.y = element_text(size = 24),
+        axis.text.y = element_text(size = 18))
+dev.off()
+
+jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/dnscl50-30res_slopeVSTRI.jpeg", width = 800, height = 700)
+ggplot(residsbylocandDEM.df, aes(slope, TRI, color=value))+
+  geom_point(size=1.5) + ggtitle("Residuals in space- WSH30m- downscale50m") +theme_bw()+
+  #scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red",limits=c(minres,maxres))+
+  scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red")+
+  theme(plot.title = element_text(size=24),
+        axis.title.x = element_text(size = 24),
+        axis.text.x = element_text(size = 18),
+        axis.title.y = element_text(size = 24),
+        axis.text.y = element_text(size = 18))
+dev.off()
+
+jpeg(filename="C:/Users/svr5482/Reification/Philly/plots/dnscl50-30res_slopeVSflowacc.jpeg", width = 800, height = 700)
+ggplot(residsbylocandDEM.df, aes(slope, flowacc, color=value))+
+  geom_point(size=1.5) + ggtitle("Residuals in space- WSH30m- downscale50m") +theme_bw()+
+  #scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red",limits=c(minres,maxres))+
+  scale_color_gradient2(midpoint=0, low="blue",mid="gray", high="red")+
+  theme(plot.title = element_text(size=24),
+        axis.title.x = element_text(size = 24),
+        axis.text.x = element_text(size = 18),
+        axis.title.y = element_text(size = 24),
+        axis.text.y = element_text(size = 18))
+dev.off()
